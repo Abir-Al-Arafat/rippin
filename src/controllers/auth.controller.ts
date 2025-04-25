@@ -28,10 +28,10 @@ const signup = async (req: Request, res: Response) => {
     //     .send(failure(`Admin cannot be signed up`));
     // }
 
-    if (!req.body.email || !req.body.password) {
+    if (!req.body.email || !req.body.password || !req.body.confirmPassword) {
       return res
         .status(HTTP_STATUS.BAD_REQUEST)
-        .send(failure("please provide mail and password"));
+        .send(failure("please provide mail, password and confirm password"));
     }
 
     const emailCheck = await User.findOne({ email: req.body.email });
@@ -76,7 +76,7 @@ const signup = async (req: Request, res: Response) => {
     const emailVerifyCode = generateRandomCode(4); //4 digits
 
     const newUser = await User.create({
-      name: req.body.name,
+      username: req.body.username,
       email: req.body.email,
       role: req.body.role || "user",
       password: hashedPassword,
@@ -119,6 +119,13 @@ const signup = async (req: Request, res: Response) => {
       }
     );
     res.setHeader("Authorization", token);
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production" ? true : false,
+      maxAge: expiresIn * 1000,
+    });
     if (newUser) {
       return res
         .status(HTTP_STATUS.OK)
@@ -135,4 +142,74 @@ const signup = async (req: Request, res: Response) => {
   }
 };
 
-export { signup };
+const login = async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res
+        .status(HTTP_STATUS.BAD_REQUEST)
+        .send(failure("Please provide email and password"));
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res
+        .status(HTTP_STATUS.UNPROCESSABLE_ENTITY)
+        .send(failure("Invalid email or password"));
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res
+        .status(HTTP_STATUS.UNPROCESSABLE_ENTITY)
+        .send(failure("Invalid email or password"));
+    }
+
+    const expiresIn = process.env.JWT_EXPIRES_IN
+      ? parseInt(process.env.JWT_EXPIRES_IN, 10)
+      : 3600; // default to 1 hour if not set
+
+    // const token = jwt.sign(
+    //   user.toObject(),
+    //   process.env.JWT_SECRET ?? "default_secret",
+    //   {
+    //     expiresIn,
+    //   }
+    // );
+
+    // payload, secret, JWT expiration
+    const token = jwt.sign(
+      {
+        _id: user._id,
+        roles: user.roles,
+      },
+      process.env.JWT_SECRET ?? "default_secret",
+      {
+        expiresIn,
+      }
+    );
+
+    res.setHeader("Authorization", token);
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production" ? true : false,
+      maxAge: expiresIn * 1000,
+    });
+
+    return res
+      .status(HTTP_STATUS.OK)
+      .send(success("Login successful", { user, token }));
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .send(failure("Internal server error"));
+  }
+};
+
+export { signup, login };
