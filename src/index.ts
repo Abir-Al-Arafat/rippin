@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import path from "path";
 import cors from "cors";
 import { Request, Response, NextFunction } from "express";
+import databaseConnection from "./config/database";
 import userRouter from "./routes/users.router";
 
 const app = express();
@@ -55,6 +56,8 @@ app.use((err: SyntaxError, req: Request, res: Response, next: NextFunction) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+databaseConnection(() => {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
 });
