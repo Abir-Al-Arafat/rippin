@@ -2,15 +2,18 @@ import express from "express";
 import dotenv from "dotenv";
 import path from "path";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import { Request, Response, NextFunction } from "express";
 import databaseConnection from "./config/database";
 import userRouter from "./routes/users.router";
+import authRouter from "./routes/auth.routes";
 
 const app = express();
 dotenv.config();
 
 app.use(cors({ origin: "*", credentials: true }));
 
+app.use(cookieParser()); // Needed to read cookies
 app.use(express.json()); // Parses data as JSON
 app.use(express.text()); // Parses data as text
 app.use(express.urlencoded({ extended: true })); // Parses data as URL-encoded
@@ -32,7 +35,10 @@ app.use(
 
 app.use("/public", express.static(path.join(__dirname, "public")));
 
-app.use("/api/users", userRouter);
+const baseApiUrl = "/api";
+
+app.use(`${baseApiUrl}/users`, userRouter);
+app.use(`${baseApiUrl}/auth`, authRouter);
 
 app.get("/", (req, res) => {
   return res.status(200).send({
