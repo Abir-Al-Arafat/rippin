@@ -71,6 +71,12 @@ const signup = async (req: Request, res: Response) => {
         .send(failure(`User with email: ${req.body.email} already exists`));
     }
 
+    if (req.body.password !== req.body.confirmPassword) {
+      return res
+        .status(HTTP_STATUS.UNPROCESSABLE_ENTITY)
+        .send(failure(`Password and confirm password do not match`));
+    }
+
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
     const emailVerifyCode = generateRandomCode(4); //4 digits
