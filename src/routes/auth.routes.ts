@@ -60,7 +60,7 @@ routes.post(
   changePassword
 );
 
-routes.post("/login", upload.none(), login);
+routes.post("/login", login);
 
 // routes.post(
 //   "/auth/create-admin",
