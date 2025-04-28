@@ -158,12 +158,18 @@ const login = async (req: Request, res: Response) => {
         .send(failure("Please provide email and password"));
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select("+password");
 
     if (!user) {
       return res
         .status(HTTP_STATUS.UNPROCESSABLE_ENTITY)
         .send(failure("Invalid email or password"));
+    }
+
+    if (!user.password) {
+      return res
+        .status(HTTP_STATUS.UNPROCESSABLE_ENTITY)
+        .send(failure("password is not set"));
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
