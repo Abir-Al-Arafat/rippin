@@ -37,7 +37,7 @@ routes.post(
 //   sendVerificationCodeToPhone
 // );
 
-routes.post("/verify-code", verifyEmail);
+routes.post("/verify-otp", verifyEmail);
 
 routes.post(
   "/forgot-password",
