@@ -7,6 +7,7 @@ import { Request, Response, NextFunction } from "express";
 import databaseConnection from "./config/database";
 import userRouter from "./routes/users.routes";
 import authRouter from "./routes/auth.routes";
+import reelRouter from "./routes/reels.routes";
 
 const app = express();
 dotenv.config();
@@ -39,6 +40,7 @@ const baseApiUrl = "/api";
 
 app.use(`${baseApiUrl}/users`, userRouter);
 app.use(`${baseApiUrl}/auth`, authRouter);
+app.use(`${baseApiUrl}/reels`, reelRouter);
 
 app.get("/", (req, res) => {
   return res.status(200).send({
