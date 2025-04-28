@@ -93,7 +93,7 @@ const signup = async (req: Request, res: Response) => {
       email: req.body.email,
       subject: "Account Activation Email",
       html: `
-                    <h6>Hello, ${newUser?.name || newUser?.email || "User"}</h6>
+                    <h6>Hello, ${newUser?.email || "User"}</h6>
                     <p>Your email verification code is <h6>${emailVerifyCode}</h6> to verify your email</p>
                     
                   `,
