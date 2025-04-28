@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema(
       minlength: 5,
       select: false,
     },
+
+    promoCode: {
+      type: String,
+    },
     address: {
       type: String,
     },
@@ -37,13 +41,6 @@ const userSchema = new mongoose.Schema(
     subscriptions: [
       { type: mongoose.Schema.Types.ObjectId, ref: "Subscription" },
     ],
-
-    services: [{ type: mongoose.Schema.Types.ObjectId, ref: "Service" }],
-
-    subscriberCount: {
-      type: Number,
-      default: 0,
-    },
 
     roles: {
       type: [String],
