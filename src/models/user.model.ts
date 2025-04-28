@@ -94,7 +94,7 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
 
-    reviewId: { type: mongoose.Schema.Types.ObjectId, ref: "Review" },
+    reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
   },
   { timestamps: true }
 );
