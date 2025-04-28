@@ -275,7 +275,7 @@ const verifyEmail = async (req: Request, res: Response) => {
         .send(failure("User does not exist"));
     }
 
-    if (user.emailVerifyCode !== emailVerifyCode) {
+    if (user.emailVerifyCode !== parseInt(emailVerifyCode)) {
       return res
         .status(HTTP_STATUS.UNAUTHORIZED)
         .send(failure("Invalid verification code"));
