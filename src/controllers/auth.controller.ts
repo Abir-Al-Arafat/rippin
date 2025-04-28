@@ -82,7 +82,7 @@ const signup = async (req: Request, res: Response) => {
     const emailVerifyCode = generateRandomCode(4); //4 digits
 
     const newUser = await User.create({
-      username: req.body.username,
+      username: req.body.username || req.body.email,
       email: req.body.email,
       role: req.body.role || "user",
       password: hashedPassword,
