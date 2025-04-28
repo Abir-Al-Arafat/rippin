@@ -218,4 +218,177 @@ const login = async (req: Request, res: Response) => {
   }
 };
 
-export { signup, login };
+const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res
+        .status(HTTP_STATUS.BAD_REQUEST)
+        .send(failure("Please provide email"));
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(HTTP_STATUS.BAD_REQUEST)
+        .send(failure("User with this email does not exist"));
+    }
+
+    const emailVerifyCode = generateRandomCode(4);
+
+    user.emailVerifyCode = emailVerifyCode;
+    user.emailVerified = false;
+    await user.save();
+
+    const emailData = {
+      email,
+      subject: "Password Reset Email",
+      html: `
+        <h1>Hello, ${user.email || "User"}</h1>
+        <p>Your Email verification Code is <h3>${emailVerifyCode}</h3> to reset your password</p>
+      `,
+    };
+    await emailWithNodemailerGmail(emailData);
+    return res
+      .status(HTTP_STATUS.OK)
+      .send(success("Verification code sent successfully"));
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .send(failure("Internal server error"));
+  }
+};
+
+const verifyEmail = async (req: Request, res: Response) => {
+  try {
+    const { email, emailVerifyCode } = req.body;
+    if (!email || !emailVerifyCode) {
+      return res
+        .status(HTTP_STATUS.BAD_REQUEST)
+        .send(failure("Please provide email and verification code"));
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(HTTP_STATUS.NOT_FOUND)
+        .send(failure("User does not exist"));
+    }
+
+    if (user.emailVerifyCode !== emailVerifyCode) {
+      return res
+        .status(HTTP_STATUS.UNAUTHORIZED)
+        .send(failure("Invalid verification code"));
+    }
+
+    user.emailVerified = true;
+    user.emailVerifyCode = null;
+    await user.save();
+    return res
+      .status(HTTP_STATUS.OK)
+      .send(success("Email verified successfully"));
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .send(`INTERNAL SERVER ERROR`);
+  }
+};
+
+const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { email, newPassword, confirmPassword } = req.body;
+    if (!email || !newPassword || !confirmPassword) {
+      return res
+        .status(HTTP_STATUS.BAD_REQUEST)
+        .send(failure("Please provide email, password and confirm password"));
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(HTTP_STATUS.BAD_REQUEST)
+        .send(failure("User with this email does not exist"));
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res
+        .status(HTTP_STATUS.BAD_REQUEST)
+        .send(failure("new password and confirm password do not match"));
+    }
+
+    if (!user.emailVerified) {
+      return res
+        .status(HTTP_STATUS.BAD_REQUEST)
+        .send(failure("Please verify your email first"));
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.emailVerifyCode = null;
+
+    await user.save();
+    return res
+      .status(HTTP_STATUS.OK)
+      .send(success("Password reset successfully"));
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .send(failure("Internal server error"));
+  }
+};
+
+const changePassword = async (req: Request, res: Response) => {
+  try {
+    const { email, oldPassword, newPassword, confirmPassword } = req.body;
+    if (!email || !oldPassword || !newPassword || !confirmPassword) {
+      return res
+        .status(HTTP_STATUS.BAD_REQUEST)
+        .send(
+          failure(
+            "Please provide email, old password, new password and confirm password"
+          )
+        );
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res
+        .status(HTTP_STATUS.BAD_REQUEST)
+        .send(failure("New password and confirm password do not match"));
+    }
+
+    const user = await User.findOne({ email }).select("+password");
+    if (!user) {
+      return res
+        .status(HTTP_STATUS.BAD_REQUEST)
+        .send(failure("User with this email does not exist"));
+    }
+
+    const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isPasswordMatch) {
+      return res
+        .status(HTTP_STATUS.BAD_REQUEST)
+        .send(failure("Old password is incorrect"));
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+    return res
+      .status(HTTP_STATUS.OK)
+      .send(success("Password changed successfully"));
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .send(failure("Internal server error"));
+  }
+};
+
+export {
+  signup,
+  login,
+  forgotPassword,
+  resetPassword,
+  changePassword,
+  verifyEmail,
+};
