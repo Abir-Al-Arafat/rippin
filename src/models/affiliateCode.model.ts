@@ -66,7 +66,4 @@ const affiliateCodeSchema = new Schema<IAffiliateCode>(
   }
 );
 
-export const AffiliateCode = model<IAffiliateCode>(
-  "AffiliateCode",
-  affiliateCodeSchema
-);
+export default model<IAffiliateCode>("AffiliateCode", affiliateCodeSchema);
