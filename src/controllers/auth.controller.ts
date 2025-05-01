@@ -172,6 +172,12 @@ const login = async (req: Request, res: Response) => {
         .send(failure("password is not set"));
     }
 
+    if (!user.emailVerified) {
+      return res
+        .status(HTTP_STATUS.UNPROCESSABLE_ENTITY)
+        .send(failure("Please verify your email"));
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
