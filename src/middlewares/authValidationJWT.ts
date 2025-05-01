@@ -4,25 +4,33 @@ import HTTP_STATUS from "../constants/statusCodes";
 import { failure } from "../utilities/common";
 import { IUser } from "../interfaces/user.interface";
 
-interface UserRequest extends Request {
+export interface UserRequest extends Request {
   user: IUser;
 }
 
-const isAuthorizedAdmin = (
-  req: UserRequest,
-  res: Response,
-  next: NextFunction
-) => {
+const isAuthorizedAdmin = (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { authorization } = req.headers;
-    console.log(authorization);
-    if (!authorization) {
+    // const { authorization } = req.headers;
+    const { token } = req.cookies;
+
+    console.log("tokenCookie", token);
+    if (!token) {
       return res
         .status(HTTP_STATUS.UNAUTHORIZED)
         .send(failure("Unauthorized access, admin not logged in"));
     }
-    const token = authorization.split(" ")[1];
-    console.log("token", token);
+    // console.log(authorization);
+    // if (!authorization) {
+    //   return res
+    //     .status(HTTP_STATUS.UNAUTHORIZED)
+    //     .send(failure("Unauthorized access, admin not logged in"));
+    // }
+    // const tokenHeader = authorization.split(" ")[1];
+    // console.log("token", tokenHeader);
+    // const validate = jsonWebToken.verify(
+    //   tokenHeader,
+    //   process.env.JWT_SECRET ?? "default_secret"
+    // ) as JwtPayload;
     const validate = jsonWebToken.verify(
       token,
       process.env.JWT_SECRET ?? "default_secret"
@@ -34,7 +42,7 @@ const isAuthorizedAdmin = (
         .send(failure("Unauthorized access, token not validated"));
     }
 
-    req.user = validate as IUser;
+    (req as UserRequest).user = validate as IUser;
     console.log("validate", validate.role);
     if (validate.role == "admin" || validate.role == "superadmin") {
       next();
@@ -61,7 +69,7 @@ const isAuthorizedAdmin = (
   }
 };
 const isAuthorizedSuperAdmin = (
-  req: UserRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
@@ -86,7 +94,7 @@ const isAuthorizedSuperAdmin = (
         .send(failure("Unauthorized access, token not validated"));
     }
 
-    req.user = validate as IUser;
+    (req as UserRequest).user = validate as IUser;
     console.log("validate", validate.role);
     if (validate.role == "superadmin") {
       next();
@@ -113,27 +121,34 @@ const isAuthorizedSuperAdmin = (
   }
 };
 
-const isAuthorizedUser = (
-  req: UserRequest,
-  res: Response,
-  next: NextFunction
-) => {
+const isAuthorizedUser = (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.params.id;
 
     console.log("headers", req.headers);
 
     const { authorization } = req.headers;
-    if (!authorization) {
+    const { token: tokenCookie } = req.cookies;
+    if (!tokenCookie) {
       return res
         .status(HTTP_STATUS.UNAUTHORIZED)
-        .send(failure("Unauthorized access"));
+        .send(failure("Unauthorized access, user not logged in"));
     }
-    console.log(authorization);
-    const token = authorization.split(" ")[1];
-    console.log("token", token);
+    console.log("tokenCookie", tokenCookie);
+    // if (!authorization) {
+    //   return res
+    //     .status(HTTP_STATUS.UNAUTHORIZED)
+    //     .send(failure("Unauthorized access"));
+    // }
+    // console.log(authorization);
+    // const tokenHeader = authorization.split(" ")[1];
+    // console.log("tokenHeader", tokenHeader);
+    // const validate = jsonWebToken.verify(
+    //   tokenHeader,
+    //   process.env.JWT_SECRET ?? "default_secret"
+    // ) as JwtPayload;
     const validate = jsonWebToken.verify(
-      token,
+      tokenCookie,
       process.env.JWT_SECRET ?? "default_secret"
     ) as JwtPayload;
 
@@ -143,7 +158,7 @@ const isAuthorizedUser = (
         .send(failure("Unauthorized access, token not validated"));
     }
 
-    req.user = validate as IUser;
+    (req as UserRequest).user = validate as IUser;
 
     // console.log("validate", validate.role);
     // console.log("validate _id", validate._id);
