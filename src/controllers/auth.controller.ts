@@ -396,9 +396,27 @@ const changePassword = async (req: Request, res: Response) => {
   }
 };
 
+const logout = async (req: Request, res: Response) => {
+  try {
+    res.cookie("token", "", {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production" ? true : false,
+      maxAge: 0,
+    });
+    return res.status(HTTP_STATUS.OK).send(success("Logged out successfully"));
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .send(failure("Internal server error"));
+  }
+};
+
 export {
   signup,
   login,
+  logout,
   forgotPassword,
   resetPassword,
   changePassword,
