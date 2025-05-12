@@ -22,7 +22,7 @@ const addReel = async (req: Request, res: Response) => {
     //   return res.status(HTTP_STATUS.NOT_FOUND).send(failure("User not found"));
     // }
 
-    let { url, title, artist, artwork, playlists, reelType } = req.body;
+    let { title, artist, artwork, playlists, reelType } = req.body;
 
     console.log("typeof playlists", typeof playlists);
     console.log("typeof reelType", typeof reelType);
@@ -36,7 +36,6 @@ const addReel = async (req: Request, res: Response) => {
     }
 
     const newReel = new Reel({
-      url,
       title,
       artist,
       artwork,
@@ -64,7 +63,7 @@ const addReel = async (req: Request, res: Response) => {
         // Add public/uploads link to the image file
 
         audioFileName = `public/uploads/audios/${files.audioFile[0].filename}`;
-        newReel.localPath = audioFileName;
+        newReel.url = audioFileName;
       }
     }
 
@@ -109,8 +108,8 @@ const updateReelById = async (req: Request, res: Response) => {
       let audioFileName = "";
       if (files.audioFile[0]) {
         const audioFilePath = `src/public/uploads/audios/${files.audioFile[0].filename}`;
-        if (reel.localPath) {
-          const filePath = reel.localPath.split("/").pop();
+        if (reel.url) {
+          const filePath = reel.url.split("/").pop();
           const oldFilePath = `src/public/uploads/audios/${filePath}`;
           try {
             await fs.promises.unlink(oldFilePath);
@@ -119,7 +118,7 @@ const updateReelById = async (req: Request, res: Response) => {
           }
         }
         audioFileName = audioFilePath;
-        reel.localPath = audioFilePath;
+        reel.url = audioFilePath;
       }
     }
 
@@ -222,11 +221,8 @@ const deleteReelById = async (req: Request, res: Response) => {
     }
 
     const rootPath = process.cwd();
-    if (
-      reel.confessionVideoUrl &&
-      fs.existsSync(`${rootPath}/${reel.confessionVideoUrl}`)
-    ) {
-      await fs.promises.unlink(`${rootPath}/${reel.confessionVideoUrl}`);
+    if (reel.url && fs.existsSync(`${rootPath}/${reel.url}`)) {
+      await fs.promises.unlink(`${rootPath}/${reel.url}`);
     }
     if (reel.localPath && fs.existsSync(`${rootPath}/${reel.localPath}`)) {
       await fs.promises.unlink(`${rootPath}/${reel.localPath}`);
