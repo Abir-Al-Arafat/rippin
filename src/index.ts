@@ -9,6 +9,7 @@ import userRouter from "./routes/users.routes";
 import authRouter from "./routes/auth.routes";
 import reelRouter from "./routes/reels.routes";
 import affiliateCodeRouter from "./routes/affiliateCode.routes";
+import faqRouter from "./routes/faq.routes";
 
 const app = express();
 dotenv.config();
@@ -43,6 +44,7 @@ app.use(`${baseApiUrl}/users`, userRouter);
 app.use(`${baseApiUrl}/auth`, authRouter);
 app.use(`${baseApiUrl}/reels`, reelRouter);
 app.use(`${baseApiUrl}/affiliate-codes`, affiliateCodeRouter);
+app.use(`${baseApiUrl}/faqs`, faqRouter);
 
 app.get("/", (req, res) => {
   return res.status(200).send({
