@@ -298,6 +298,30 @@ const getAllNotifications = async (req: Request, res: Response) => {
   }
 };
 
+const deleteUserById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res
+        .status(HTTP_STATUS.BAD_REQUEST)
+        .send(failure("Please provide user ID"));
+    }
+    const user = await User.findByIdAndDelete(id);
+    if (!user) {
+      return res.status(HTTP_STATUS.NOT_FOUND).send(failure("User not found"));
+    }
+    return res
+      .status(HTTP_STATUS.OK)
+      .send(success("User deleted successfully", user));
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .send(failure("Internal server error"));
+  }
+};
+
 export {
   getAllUsers,
   getOneUserById,
@@ -306,4 +330,5 @@ export {
   updateUserById,
   profile,
   updateProfileByUser,
+  deleteUserById,
 };
