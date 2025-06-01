@@ -84,7 +84,7 @@ const signup = async (req: Request, res: Response) => {
     const newUser = await User.create({
       username: req.body.username || req.body.email,
       email: req.body.email,
-      role: req.body.role || "user",
+      roles: req.body.role || "user",
       password: hashedPassword,
       emailVerifyCode,
     });
@@ -95,7 +95,7 @@ const signup = async (req: Request, res: Response) => {
       html: `
                     <h6>Hello, ${newUser?.email || "User"}</h6>
                     <p>Your email verification code is <h6>${emailVerifyCode}</h6> to verify your email</p>
-                    
+
                   `,
     };
 
