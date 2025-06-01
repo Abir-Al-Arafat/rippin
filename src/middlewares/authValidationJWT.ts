@@ -44,7 +44,10 @@ const isAuthorizedAdmin = (req: Request, res: Response, next: NextFunction) => {
 
     (req as UserRequest).user = validate as IUser;
     console.log("validate", validate.role);
-    if (validate.role == "admin" || validate.role == "superadmin") {
+    if (
+      validate.roles.includes("admin") ||
+      validate.roles.includes("superadmin")
+    ) {
       next();
     } else {
       return res

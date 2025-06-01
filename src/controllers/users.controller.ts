@@ -17,29 +17,38 @@ export interface UserRequest extends Request {
 
 const getAllUsers = async (req: Request, res: Response) => {
   try {
-    const { role, isAffiliate, isActive } = req.query;
+    const { role, isActive, name, email, page = 1, limit = 10 } = req.query;
     const query: IQuery = {};
-
     if (role) {
       query.role = role as string;
     }
-
-    if (typeof isAffiliate !== "undefined") {
-      query.isAffiliate = isAffiliate === "true";
-    }
-
     if (typeof isActive !== "undefined") {
       query.isActive = isActive === "true";
     }
+    if (name) {
+      query.name = { $regex: new RegExp(name as string, "i") };
+    }
+    if (email) {
+      query.email = { $regex: new RegExp(email as string, "i") };
+    }
 
-    const users = await User.find(query).select("-__v");
+    const pageNumber = parseInt(page as string, 10) || 1;
+    const limitNumber = parseInt(limit as string, 10) || 10;
+    const skip = (pageNumber - 1) * limitNumber;
+
+    const users = await User.find(query)
+      .select("-__v")
+      .skip(skip)
+      .limit(limitNumber);
     const count = await User.countDocuments(query);
 
     if (users.length) {
       return res.status(HTTP_STATUS.OK).send(
         success("Successfully received all users", {
           result: users,
-          count,
+          count: users.length,
+          page: pageNumber,
+          totalPages: Math.ceil(count / limitNumber),
         })
       );
     } else {
@@ -289,6 +298,30 @@ const getAllNotifications = async (req: Request, res: Response) => {
   }
 };
 
+const deleteUserById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res
+        .status(HTTP_STATUS.BAD_REQUEST)
+        .send(failure("Please provide user ID"));
+    }
+    const user = await User.findByIdAndDelete(id);
+    if (!user) {
+      return res.status(HTTP_STATUS.NOT_FOUND).send(failure("User not found"));
+    }
+    return res
+      .status(HTTP_STATUS.OK)
+      .send(success("User deleted successfully", user));
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .send(failure("Internal server error"));
+  }
+};
+
 export {
   getAllUsers,
   getOneUserById,
@@ -297,4 +330,5 @@ export {
   updateUserById,
   profile,
   updateProfileByUser,
+  deleteUserById,
 };

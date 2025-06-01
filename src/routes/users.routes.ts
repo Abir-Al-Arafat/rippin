@@ -8,6 +8,7 @@ import {
   updateUserById,
   profile,
   updateProfileByUser,
+  deleteUserById,
 } from "../controllers/users.controller";
 
 import {
@@ -36,6 +37,13 @@ routes.patch(
   isAuthorizedUser,
   fileUpload(),
   updateProfileByUser
+);
+
+routes.delete(
+  "/:id",
+
+  isAuthorizedAdmin,
+  deleteUserById
 );
 
 export default routes;
