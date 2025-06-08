@@ -413,9 +413,51 @@ const logout = async (req: Request, res: Response) => {
   }
 };
 
+const checkToken = async (req: Request, res: Response) => {
+  try {
+    // Get token from header or cookie
+    const authHeader = req.headers.authorization || req.headers.Authorization;
+    let token: string | undefined;
+
+    if (typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
+      token = authHeader.split(" ")[1];
+    } else if (req.cookies && req.cookies.token) {
+      token = req.cookies.token;
+    }
+
+    if (!token) {
+      return res
+        .status(HTTP_STATUS.UNAUTHORIZED)
+        .send(failure("No token provided"));
+    }
+
+    // Verify token
+    jwt.verify(
+      token,
+      process.env.JWT_SECRET ?? "default_secret",
+      (err, decoded) => {
+        if (err) {
+          return res
+            .status(HTTP_STATUS.UNAUTHORIZED)
+            .send(failure("Invalid or expired token"));
+        }
+        return res
+          .status(HTTP_STATUS.OK)
+          .send(success("Token is valid", { decoded }));
+      }
+    );
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .send(failure("Internal server error"));
+  }
+};
+
 export {
   signup,
   login,
+  checkToken,
   logout,
   forgotPassword,
   resetPassword,

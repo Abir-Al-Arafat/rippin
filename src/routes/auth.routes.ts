@@ -4,6 +4,7 @@ import { Request, Response, NextFunction, RequestHandler } from "express";
 import {
   signup,
   login,
+  checkToken,
   logout,
   forgotPassword,
   resetPassword,
@@ -62,6 +63,8 @@ routes.post(
 );
 
 routes.post("/login", login);
+
+routes.get("/check-token", checkToken);
 
 routes.post("/logout", logout);
 
