@@ -246,6 +246,7 @@ const forgotPassword = async (req: Request, res: Response) => {
     }
 
     const emailVerifyCode = generateRandomCode(4);
+    console.log("emailVerifyCode", emailVerifyCode);
 
     user.emailVerifyCode = emailVerifyCode;
     user.emailVerified = false;
@@ -296,6 +297,27 @@ const verifyEmail = async (req: Request, res: Response) => {
     user.emailVerified = true;
     user.emailVerifyCode = null;
     await user.save();
+
+    const expiresIn = process.env.JWT_EXPIRES_IN
+      ? parseInt(process.env.JWT_EXPIRES_IN, 10)
+      : 3600; // default to 1 hour if not set
+
+    const token = jwt.sign(
+      {
+        _id: user._id,
+        roles: user.roles,
+      },
+      process.env.JWT_SECRET ?? "default_secret",
+      {
+        expiresIn,
+      }
+    );
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production" ? true : false,
+      maxAge: expiresIn * 1000,
+    });
     return res
       .status(HTTP_STATUS.OK)
       .send(success("Email verified successfully"));
