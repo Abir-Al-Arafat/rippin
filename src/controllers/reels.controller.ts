@@ -22,7 +22,8 @@ const addReel = async (req: Request, res: Response) => {
     //   return res.status(HTTP_STATUS.NOT_FOUND).send(failure("User not found"));
     // }
 
-    let { title, artist, artwork, playlists, reelType } = req.body;
+    let { title, artist, artwork, playlists, reelType, name, colorCode } =
+      req.body;
 
     console.log("typeof playlists", typeof playlists);
     console.log("typeof reelType", typeof reelType);
@@ -41,6 +42,8 @@ const addReel = async (req: Request, res: Response) => {
       artwork,
       playlists,
       reelType,
+      name,
+      colorCode,
     });
 
     if (!newReel) {
@@ -49,21 +52,36 @@ const addReel = async (req: Request, res: Response) => {
         .send(failure("reel could not be added"));
     }
 
-    // user.confessionsUploaded.push(newConfession._id);
-    // await user.save();
-
     const files = req.files as TUploadFields;
 
     console.log("req.files", files);
     console.log("req.filesaudioFile", files["audioFile"]);
 
-    if (req.files && files["audioFile"]) {
+    if (files && files["audioFile"]) {
       let audioFileName = "";
       if (files.audioFile[0]) {
         // Add public/uploads link to the image file
 
         audioFileName = `public/uploads/audios/${files.audioFile[0].filename}`;
         newReel.url = audioFileName;
+      }
+    }
+
+    if (files && files["ringtone"]) {
+      let ringtoneFileName = "";
+      if (files.ringtone[0]) {
+        // Add public/uploads link to the image file
+
+        ringtoneFileName = `public/uploads/audios/${files.ringtone[0].filename}`;
+        newReel.ringtone = ringtoneFileName;
+      }
+    }
+
+    if (files && files["banner"]) {
+      let bannerFileName = "";
+      if (files.banner[0]) {
+        bannerFileName = `public/uploads/images/${files.banner[0].filename}`;
+        newReel.banner = bannerFileName;
       }
     }
 

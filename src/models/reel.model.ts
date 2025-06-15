@@ -11,6 +11,18 @@ const reelSchema = new Schema(
     title: {
       type: String,
     },
+    name: {
+      type: String,
+    },
+    colorCode: {
+      type: String,
+    },
+    banner: {
+      type: String,
+    },
+    ringtone: {
+      type: String,
+    },
     url: {
       type: String,
     },

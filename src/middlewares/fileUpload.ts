@@ -32,6 +32,8 @@ const configureFileUpload = () => {
       "audioFile",
       "pdfFiles",
       "previewPdfFiles",
+      "banner",
+      "ringtone",
     ];
 
     if (file.fieldname === undefined) {
@@ -62,8 +64,10 @@ const configureFileUpload = () => {
     { name: "categoryImage", maxCount: 1 },
     { name: "videoFile", maxCount: 1 },
     { name: "audioFile", maxCount: 1 },
-    { name: "pdfFiles", maxCount: 5 }, // ✅ Added PDF field
-    { name: "previewPdfFiles", maxCount: 3 }, // ✅ Added preview PDF field
+    { name: "pdfFiles", maxCount: 5 },
+    { name: "previewPdfFiles", maxCount: 3 },
+    { name: "banner", maxCount: 1 },
+    { name: "ringtone", maxCount: 1 },
   ]);
 
   return upload;
