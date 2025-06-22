@@ -63,7 +63,7 @@ const addReel = async (req: Request, res: Response) => {
         // Add public/uploads link to the image file
 
         audioFileName = `public/uploads/audios/${files.audioFile[0].filename}`;
-        newReel.url = audioFileName;
+        newReel.ringtone = audioFileName;
       }
     }
 
@@ -73,7 +73,7 @@ const addReel = async (req: Request, res: Response) => {
         // Add public/uploads link to the image file
 
         ringtoneFileName = `public/uploads/audios/${files.ringtone[0].filename}`;
-        newReel.ringtone = ringtoneFileName;
+        newReel.url = ringtoneFileName;
       }
     }
 
