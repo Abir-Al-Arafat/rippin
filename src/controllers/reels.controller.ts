@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "path";
 import { Request, Response } from "express";
 import { success, failure } from "../utilities/common";
 import HTTP_STATUS from "../constants/statusCodes";
@@ -239,11 +240,39 @@ const deleteReelById = async (req: Request, res: Response) => {
     }
 
     const rootPath = process.cwd();
-    if (reel.url && fs.existsSync(`${rootPath}/${reel.url}`)) {
-      await fs.promises.unlink(`${rootPath}/${reel.url}`);
+
+    // Delete reel.url file if exists
+    if (reel.url) {
+      const filePath = path.join(
+        rootPath,
+        reel.url.replace(/^public[\\/]/, "public/")
+      );
+      console.log("filePath", filePath);
+      console.log("fs.existsSync(filePath)", fs.existsSync(filePath));
+      if (fs.existsSync(filePath)) {
+        try {
+          await fs.promises.unlink(filePath);
+          console.log("Deleted file:", filePath);
+        } catch (err) {
+          console.log("Error deleting file:", filePath, err);
+        }
+      }
     }
-    if (reel.localPath && fs.existsSync(`${rootPath}/${reel.localPath}`)) {
-      await fs.promises.unlink(`${rootPath}/${reel.localPath}`);
+
+    // Delete reel.localPath file if exists
+    if (reel.localPath) {
+      const localFilePath = path.join(
+        rootPath,
+        reel.localPath.replace(/^public[\\/]/, "public/")
+      );
+      if (fs.existsSync(localFilePath)) {
+        try {
+          await fs.promises.unlink(localFilePath);
+          console.log("Deleted file:", localFilePath);
+        } catch (err) {
+          console.log("Error deleting file:", localFilePath, err);
+        }
+      }
     }
 
     return res
@@ -255,6 +284,7 @@ const deleteReelById = async (req: Request, res: Response) => {
       .send(failure("Error deleting reel", error.message));
   }
 };
+// ...existing code...
 
 // const getConfessionByUser = async (req, res) => {
 //   try {
