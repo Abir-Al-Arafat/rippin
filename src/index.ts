@@ -23,20 +23,20 @@ app.use(express.urlencoded({ extended: true })); // Parses data as URL-encoded
 
 // ✅ Handle Invalid JSON Errors
 app.use(
-    (
-        err: SyntaxError & { status?: number; body?: any },
-        req: Request,
-        res: Response,
-        next: NextFunction
-    ) => {
-        if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
-            return res.status(400).send({ message: "Invalid JSON format" });
-        }
-        next();
+  (
+    err: SyntaxError & { status?: number; body?: any },
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+      return res.status(400).send({ message: "Invalid JSON format" });
     }
+    next();
+  }
 );
 
-app.use("/public", express.static(path.join(__dirname, "public")));
+app.use("/public", express.static(path.join(__dirname, "../public")));
 
 const baseApiUrl = "/api";
 
@@ -48,29 +48,29 @@ app.use(`${baseApiUrl}/faqs`, faqRouter);
 app.use(`${baseApiUrl}/terms`, termsRouter);
 
 app.get("/", (req, res) => {
-    return res.status(200).send({
-        name: "rippin",
-        developer: "Abir",
-        version: "1.0.0",
-        description: "Backend server for rippin",
-        status: "success",
-    });
+  return res.status(200).send({
+    name: "rippin",
+    developer: "Abir",
+    version: "1.0.0",
+    description: "Backend server for rippin",
+    status: "success",
+  });
 });
 
 // ✅ Handle 404 Routes
 app.use((req, res) => {
-    return res.status(400).send({ message: "Route does not exist" });
+  return res.status(400).send({ message: "Route does not exist" });
 });
 
 // ✅ Handle Global Errors
 app.use((err: SyntaxError, req: Request, res: Response, next: NextFunction) => {
-    console.error(err);
-    res.status(500).send({ message: "Internal Server Error" });
+  console.error(err);
+  res.status(500).send({ message: "Internal Server Error" });
 });
 
 const PORT = process.env.PORT || 3001;
 databaseConnection(() => {
-    app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
-    });
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
 });
