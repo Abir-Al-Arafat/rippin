@@ -10,6 +10,7 @@ import faqRouter from "./routes/faq.routes";
 import reelRouter from "./routes/reels.routes";
 import termsRouter from "./routes/terms.routes";
 import userRouter from "./routes/users.routes";
+import couponRouter from "./routes/coupon.routes"; // Import the coupon router
 
 const app = express();
 dotenv.config();
@@ -46,6 +47,7 @@ app.use(`${baseApiUrl}/reels`, reelRouter);
 app.use(`${baseApiUrl}/affiliate-codes`, affiliateCodeRouter);
 app.use(`${baseApiUrl}/faqs`, faqRouter);
 app.use(`${baseApiUrl}/terms`, termsRouter);
+app.use(`${baseApiUrl}/coupons`, couponRouter);
 
 app.get("/", (req, res) => {
   return res.status(200).send({
