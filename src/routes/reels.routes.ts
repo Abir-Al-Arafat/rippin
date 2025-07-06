@@ -7,8 +7,7 @@ import {
   getReelById,
   updateReelById,
   deleteReelById,
-  //   approveConfession,
-  //   cancelConfession,
+  togglePopular,
 } from "../controllers/reels.controller";
 
 import {
@@ -40,8 +39,10 @@ routes.delete(
   deleteReelById
 );
 
-// routes.post("/approve-confession/:id", isAuthorizedAdmin, approveConfession);
-
-// routes.post("/cancel-confession/:id", isAuthorizedAdmin, cancelConfession);
+routes.post(
+  "/toggle-popular/:id",
+  // isAuthorizedUser,
+  togglePopular
+);
 
 export default routes;

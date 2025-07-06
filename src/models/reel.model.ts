@@ -23,6 +23,10 @@ const reelSchema = new Schema(
     ringtone: {
       type: String,
     },
+    isPopular: {
+      type: Boolean,
+      default: false,
+    },
     url: {
       type: String,
     },
