@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema(
     },
     username: {
       type: String,
-      required: [true, "please provide a username"],
+      // required: [true, "please provide a username"],
       unique: true,
     },
     email: {
@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema(
       minlength: 5,
       select: false,
     },
+
+    promoCode: {
+      type: String,
+    },
     address: {
       type: String,
     },
@@ -37,13 +41,6 @@ const userSchema = new mongoose.Schema(
     subscriptions: [
       { type: mongoose.Schema.Types.ObjectId, ref: "Subscription" },
     ],
-
-    services: [{ type: mongoose.Schema.Types.ObjectId, ref: "Service" }],
-
-    subscriberCount: {
-      type: Number,
-      default: 0,
-    },
 
     roles: {
       type: [String],
@@ -97,10 +94,9 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
 
-    reviewId: { type: mongoose.Schema.Types.ObjectId, ref: "Review" },
+    reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
   },
   { timestamps: true }
 );
 
-// export const User = mongoose.model("User", userSchema);
 export default mongoose.model("User", userSchema);

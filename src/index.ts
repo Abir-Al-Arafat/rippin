@@ -1,15 +1,23 @@
-import express from "express";
-import dotenv from "dotenv";
-import path from "path";
+import cookieParser from "cookie-parser";
 import cors from "cors";
-import { Request, Response, NextFunction } from "express";
-import userRouter from "./routes/users.router";
+import dotenv from "dotenv";
+import express, { NextFunction, Request, Response } from "express";
+import path from "path";
+import databaseConnection from "./config/database";
+import affiliateCodeRouter from "./routes/affiliateCode.routes";
+import authRouter from "./routes/auth.routes";
+import faqRouter from "./routes/faq.routes";
+import reelRouter from "./routes/reels.routes";
+import termsRouter from "./routes/terms.routes";
+import userRouter from "./routes/users.routes";
+import couponRouter from "./routes/coupon.routes"; // Import the coupon router
 
 const app = express();
 dotenv.config();
 
 app.use(cors({ origin: "*", credentials: true }));
 
+app.use(cookieParser()); // Needed to read cookies
 app.use(express.json()); // Parses data as JSON
 app.use(express.text()); // Parses data as text
 app.use(express.urlencoded({ extended: true })); // Parses data as URL-encoded
@@ -29,9 +37,17 @@ app.use(
   }
 );
 
-app.use("/public", express.static(path.join(__dirname, "public")));
+app.use("/public", express.static(path.join(__dirname, "../public")));
 
-app.use("/api/users", userRouter);
+const baseApiUrl = "/api";
+
+app.use(`${baseApiUrl}/users`, userRouter);
+app.use(`${baseApiUrl}/auth`, authRouter);
+app.use(`${baseApiUrl}/reels`, reelRouter);
+app.use(`${baseApiUrl}/affiliate-codes`, affiliateCodeRouter);
+app.use(`${baseApiUrl}/faqs`, faqRouter);
+app.use(`${baseApiUrl}/terms`, termsRouter);
+app.use(`${baseApiUrl}/coupons`, couponRouter);
 
 app.get("/", (req, res) => {
   return res.status(200).send({
@@ -55,6 +71,8 @@ app.use((err: SyntaxError, req: Request, res: Response, next: NextFunction) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+databaseConnection(() => {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
 });
