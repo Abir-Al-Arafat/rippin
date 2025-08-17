@@ -155,15 +155,21 @@ const getAllReels = async (req: Request, res: Response) => {
         ? parseInt(req.query.limit ?? "10")
         : 10;
     const status = req.query.status;
+    const name = req.query.name;
 
     if (page < 1) page = 1;
     if (limit < 1) limit = 10;
 
     const skip = (page - 1) * limit;
 
-    let query: any = {};
+    let query: any = { isDeleted: false }; // Ensure not to fetch deleted reels
     if (status) {
       query.status = status;
+    }
+    if (name) {
+      if (typeof name === "string") {
+        query.$or = [{ name: { $regex: new RegExp(name, "i") } }];
+      }
     }
 
     const reels = await Reel.find(query)
