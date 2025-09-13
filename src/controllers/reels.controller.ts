@@ -156,6 +156,7 @@ const getAllReels = async (req: Request, res: Response) => {
         : 10;
     const status = req.query.status;
     const name = req.query.name;
+    const isPopular = req.query.isPopular;
 
     if (page < 1) page = 1;
     if (limit < 1) limit = 10;
@@ -170,6 +171,10 @@ const getAllReels = async (req: Request, res: Response) => {
       if (typeof name === "string") {
         query.$or = [{ name: { $regex: new RegExp(name, "i") } }];
       }
+    }
+
+    if (isPopular === "true") {
+      query.isPopular = true;
     }
 
     const reels = await Reel.find(query)
